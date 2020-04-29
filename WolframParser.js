@@ -52,7 +52,7 @@ class WolframParser extends WolframErrorManager {
      */
     _gatherIdent(aChar) {
         let rv = "";
-        while (true) {
+        while (this.mCurrentPos < this.mStringLength) {
             const c = this.mString[this.mCurrentPos];
             if (c.match( /[0-9a-zA-Z]/ )) {
                 rv += c;

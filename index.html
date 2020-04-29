@@ -5,8 +5,54 @@
         <script src="./WolframToken.js"></script>
         <script src="./WolframNode.js"></script>
         <script src="./WolframParser.js"></script>
+        <script src="./index.js"></script>
+        <style>
+            body {
+                font-family:sans-serif;
+            }
+
+            #hypergraph {
+                font-size: 20px;
+            }
+
+            #doParseButton {
+                -moz-appearance: none;
+                -webkit-appearance: none;
+                appearance: none;
+
+                background-color: #E8E8E8;
+                color: black;
+                border-radius: 4px;
+                border: #C0C0C0 2px outset;
+
+                text-transform: uppercase;
+                padding: 2px 8px;
+
+                outline: transparent 0px solid ! important;
+            }
+
+            #doParseButton:active {
+                border-style: inset;
+            }
+
+            #doParseButton:hover {
+                background-color: #d8d8d8;
+            }
+        </style>
     </head>
     <body>
-        <p>Wolfram hypergraph parser</p>
+        <h1>Wolfram hypergraph parser</h1>
+        <p>Please enter a serialized hypergraph:</p>
+        <p>
+            <input id="hypergraph"
+                   size="48"
+                   placeholder="eg. {{x,y},{x,z},{z,a}}">
+            <button id="doParseButton"
+                   onclick="doParse()">parse</button>
+        </p>
+        <div id="resultArea" style="display: none">
+            <p>Parsed representation:</p>
+            <pre id="result"> </pre>
+        </div>
     </body>
 </html>
