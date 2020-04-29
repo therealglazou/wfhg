@@ -4,10 +4,10 @@ function doParse() {
 
     const hypergraphStr = elt.value.trim();
     if (hypergraphStr) {
+        document.getElementById("resultArea").removeAttribute("style");
         try {
             const wolframParser = new WolframParser(hypergraphStr);
 
-            document.getElementById("resultArea").removeAttribute("style");
             resultElt.textContent = serializeWolframMap(wolframParser.mDataSet);
         }
         catch(e) {
