@@ -10,14 +10,17 @@
   */
 class WolframNode extends WolframErrorManager {
 
-    constructor(aIdent) {
-        super("WolframNode");
+    constructor(aReverseRelationships, aIdent) {
+        super();
 
         this.mName = aIdent;
         // relationships
         this.mRel = new Set();
-        // reverse relationships
-        this.mRev = new Set();
+        this.mReverseRelationships = aReverseRelationships
+        if (aReverseRelationships) {
+            // reverse relationships
+            this.mRev = new Set();
+        }
     }
 
     addRelationship(aIdent) {
@@ -31,6 +34,10 @@ class WolframNode extends WolframErrorManager {
     }
 
     addReverseRelationship(aIdent) {
+        if (!this.mReverseRelationships) {
+            return;
+        }
+
         if (this.mRev.has(aIdent)) {
             this.throw("addReverseRelationship",
                 "reverse relationship already exists: "

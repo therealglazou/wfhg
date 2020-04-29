@@ -7,8 +7,9 @@
 
 class WolframErrorManager {
 
-    constructor(aModule) {
-        this.mModule = aModule;
+    constructor() {
+        this.mModule = this.constructor.name;
+        console.log("### " + this.mModule)
     }
 
     throw(aCaller, aError) {

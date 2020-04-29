@@ -6,7 +6,8 @@ function doParse() {
     if (hypergraphStr) {
         document.getElementById("resultArea").removeAttribute("style");
         try {
-            const wolframParser = new WolframParser(hypergraphStr);
+            const wolframParser = new WolframParser();
+            wolframParser.parseHypergraph(hypergraphStr);
 
             resultElt.textContent = serializeWolframMap(wolframParser.mDataSet);
         }
@@ -23,14 +24,14 @@ function serializeWolframMap(aMap) {
         .forEach(aEntry => {
             rv += aEntry[0] + ":\n";
 
-            if (aEntry[1].mRel.size) {
+            if (aEntry[1].mRel && aEntry[1].mRel.size) {
                 rv += "    related to:\n";
                 aEntry[1].mRel.forEach(aWolframNode => {
                     rv += "        " + aWolframNode.mName + "\n";
                 });
             }
 
-            if (aEntry[1].mRev.size) {
+            if (aEntry[1].mRev && aEntry[1].mRev.size) {
                 rv += "    reverse relation to:\n";
                 aEntry[1].mRev.forEach(aWolframNode => {
                     rv += "        " + aWolframNode.mName + "\n";
@@ -39,4 +40,9 @@ function serializeWolframMap(aMap) {
     });
 
     return rv;
+}
+
+function init() {
+    const elt = document.getElementById("hypergraph");
+    elt.focus();
 }

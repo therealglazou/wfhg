@@ -19,22 +19,12 @@ class WolframParser extends WolframErrorManager {
 
     /**
      * CONSTRUCTOR
-     *
-     * @param {string} aString - the string to parse
      */
-    constructor(aString) {
-        super("WolframParser");
+    constructor() {
+        super();
 
         this.mDataSet = new Map();
-
-        if (typeof aString == "string") {
-            const str = aString.trim();
-            if (str) {
-                this._parse(str);
-            }
-        }
-
-        console.log(this.mDataSet);
+        this.reverseRelationships = false;
     }
 
     /**
@@ -96,6 +86,10 @@ class WolframParser extends WolframErrorManager {
                     const ident = this._gatherIdent();
                     rv = WolframToken.newIdent(ident);
                 }
+                else if (c == "_") {
+                    rv = WolframToken.newIdent(c);
+                    this.mCurrentPos++;
+                }
                 else {
                     this.throw(
                         "_parse",
@@ -108,19 +102,129 @@ class WolframParser extends WolframErrorManager {
         return rv;
     }
 
+    _parseHypervector(aToken) {
+        let token = aToken;
+        // currentNode will hold the source of an oriented graoh relation
+        let currentNode = null;
+
+        // iterate over the relations
+        while (true) {
+            // are we opening a new set of relations?
+            if (!currentNode) {
+                if (!token.isSymbol("{")) {
+                    // not a curly brace, let's throw
+                    this.throw(
+                        "_parse",
+                        this.kEXPECTED_OPEN_CURLY_BRACE_ERROR
+                    );
+                }
+
+                // capture next token
+                token = this._getToken();
+            }
+
+            // next token should be an identifier
+            if (!token.isIdent()) {
+                this.throw(
+                    "_parse",
+                    this.kEXPECTED_IDENT_ERROR
+                );
+            }
+
+            let newNode = null;
+            if (this.mDataSet.has(token.value)) {
+                // retrieve from the dataset if already created...
+                newNode = this.mDataSet.get(token.value);
+            }
+            else {
+                // ...or add to the dataset if not
+                newNode = new WolframNode(this.reverseRelationships, token.value);
+                if (token.value != "_") {
+                    this.mDataSet.set(token.value, newNode);
+                }
+            }
+
+            if (currentNode) {
+                // if we have two nodes, link them
+                currentNode.addRelationship(newNode);
+                newNode.addReverseRelationship(currentNode);
+            }
+
+            // do we have another relationship in the vector?
+            token = this._getToken();
+            if (!currentNode
+                && !token.isSymbol(",")) {
+                this.throw(
+                    "_parse",
+                    this.kEXPECTED_COMMA_ERROR
+                );
+            }
+
+            if (token.isSymbol(",")) {
+                // yes we do, let's shift
+                currentNode = newNode;
+                token = this._getToken();
+            }
+            else if (token.isSymbol("}")) {
+                // no we don't, close that vector
+                token = this._getToken();
+                break;
+            }
+            else {
+                this.throw(
+                    "_parse",
+                    this.kEXPECTED_COMMA_OR_CLOSE_CURLY_BRACE_ERROR
+                );
+            }
+        }
+
+        return token;
+    }
+
+    parseHypergraph(aString) {
+        if (typeof aString == "string") {
+            const str = aString.trim();
+            if (str) {
+                // a few basic inits
+                this.mString = aString;
+                this.mStringLength = this.mString.length;
+                this.mCurrentPos = 0;
+
+                // get the first token
+                const token = this._getToken();
+
+                this._parseHypergraph(token);
+                console.log(this.mDataSet);
+            }
+        }
+    }
+
+    parseHypervector(aString) {
+        if (typeof aString == "string") {
+            const str = aString.trim();
+            if (str) {
+                // a few basic inits
+                this.mString = aString;
+                this.mStringLength = this.mString.length;
+                this.mCurrentPos = 0;
+
+                // get the first token
+                const token = this._getToken();
+
+                this._parseHypervector(token);
+                console.log(this.mDataSet);
+            }
+        }
+    }
+
     /**
      * Parse a string into the resulting dataset map
      *
      * @param {string} aString 
      */
-    _parse(aString) {
-        // a few basic inits
-        this.mString = aString;
-        this.mStringLength = this.mString.length;
-        this.mCurrentPos = 0;
-
+    _parseHypergraph(aToken) {
         // get the first token
-        let token = this._getToken();
+        let token = aToken
         if (token.isSymbol("{")) {
             // must be a curly brace
             token = this._getToken();
@@ -135,77 +239,7 @@ class WolframParser extends WolframErrorManager {
         // loop until we hit the end of the string
         while (!token.isEOS()) {
 
-            // currentNode will hold the source of an oriented graoh relation
-            let currentNode = null;
-
-            // iterate over the relations
-            while (true) {
-                // are we opening a new set of relations?
-                if (!currentNode) {
-                    if (!token.isSymbol("{")) {
-                        // not a curly brace, let's throw
-                        this.throw(
-                            "_parse",
-                            this.kEXPECTED_OPEN_CURLY_BRACE_ERROR
-                        );
-                    }
-
-                    // capture next token
-                    token = this._getToken();
-                }
-
-                // next token should be an identifier
-                if (!token.isIdent()) {
-                    this.throw(
-                        "_parse",
-                        this.kEXPECTED_IDENT_ERROR
-                    );
-                }
-
-                let newNode = null;
-                if (this.mDataSet.has(token.value)) {
-                    // retrieve from the dataset if already created...
-                    newNode = this.mDataSet.get(token.value);
-                }
-                else {
-                    // ...or add to the dataset if not
-                    newNode = new WolframNode(token.value);
-                    this.mDataSet.set(token.value, newNode);
-                }
-
-                if (currentNode) {
-                    // if we have two nodes, link them
-                    currentNode.addRelationship(newNode);
-                    newNode.addReverseRelationship(currentNode);
-                }
-
-                // do we have another relationship in the vector?
-                token = this._getToken();
-                if (!currentNode
-                    && !token.isSymbol(",")) {
-                    this.throw(
-                        "_parse",
-                        this.kEXPECTED_COMMA_ERROR
-                    );
-                }
-
-                if (token.isSymbol(",")) {
-                    // yes we do, let's shift
-                    currentNode = newNode;
-                    token = this._getToken();
-                }
-                else if (token.isSymbol("}")) {
-                    // no we don't, close that vector
-                    token = this._getToken();
-                    break;
-                }
-                else {
-                    this.throw(
-                        "_parse",
-                        this.kEXPECTED_COMMA_OR_CLOSE_CURLY_BRACE_ERROR
-                    );
-                }
-            }
+            token = this._parseHypervector(token);
 
             if (token.isSymbol("}")) {
                 token = this._getToken();

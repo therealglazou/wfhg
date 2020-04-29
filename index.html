@@ -1,5 +1,6 @@
 <html>
     <head>
+        <title>Wolfram hypergraphs</title>
         <!-- script src="https://d3js.org/d3.v5.min.js"></script -->
         <script src="./WolframErrorManager.js"></script>
         <script src="./WolframToken.js"></script>
@@ -38,17 +39,51 @@
             #doParseButton:hover {
                 background-color: #d8d8d8;
             }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            td {
+                padding: 8px;
+            }
+
+            ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+                font-style: italic;
+            }
+            ::-moz-placeholder { /* Firefox 19+ */
+                font-style: italic;
+            }
+            :-ms-input-placeholder { /* IE 10+ */
+                font-style: italic;
+            }
+            :-moz-placeholder { /* Firefox 18- */
+                font-style: italic;
+            }
         </style>
     </head>
-    <body>
-        <h1>Wolfram hypergraph parser</h1>
-        <p>Please enter a serialized hypergraph:</p>
-        <p>
-            <input id="hypergraph"
-                   size="48"
-                   placeholder="eg. {{x,y,z}, {a,b1}, {y,b1}}">
-            <button id="doParseButton"
-                   onclick="doParse()">parse</button>
+    <body onload="init()">
+        <h1>Wolfram hypergraphs</h1>
+        <p>Author: Daniel Glazman</p>
+        <table border="1">
+            <tbody>
+                <tr>
+                    <td style="width: 50%">
+                        <p>Please enter a serialized initial hypergraph:</p>
+                        <p>
+                            <input id="hypergraph"
+                                   size="48"
+                                   placeholder="eg. {{x,y,z}, {a,b1}, {y,b1}}">
+                            <button id="doParseButton"
+                                   onclick="doParse()">parse</button>
+                    </td>
+                    <td style="width: 50%">
+                        <p>Please enter a serialized hypergraph transformation:</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         </p>
         <div id="resultArea" style="display: none">
             <p>Parsed representation:</p>
